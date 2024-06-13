@@ -22,13 +22,14 @@
             background-color: black;
             color: #fff;
         }
-        ul{
+        ul {
             padding: 20px;
         }
         li {
             list-style: auto;
             padding-top: 15px;
             border-bottom: 3px solid black;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -36,15 +37,13 @@
 <body>
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1>Генератор CSV</h1>
-        <textarea id="fileContent" rows="10" style="width: 100%;"
-            placeholder="Вставьте содержимое файла здесь"></textarea>
+        <textarea id="fileContent" rows="10" style="width: 100%;" placeholder="Вставьте содержимое файла здесь"></textarea>
         <button onclick="processFile()">Сгенерировать CSV</button>
         <hr>
         <h2>Сгенерированный CSV:</h2>
         <button onclick="copyToClipboard()">Копировать всё</button>
         <h3 id="message">Успешно скопировано в буфер обмена!</h3>
         <ul id="outputList"></ul>
-
     </div>
 
     <script>
@@ -56,41 +55,51 @@
             // Очистка списка перед добавлением новых элементов
             outputList.innerHTML = '';
 
+            let previousATMW = null;
+
             lines.forEach((line) => {
-                const processed = parseLine(line.trim()); // Убираем лишние пробелы по краям строки
-                if (processed && processed.dataType !== 'WORD') {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = processed.csvContent;
-                    outputList.appendChild(listItem);
+                const processed = parseLine(line.trim(), previousATMW); // Убираем лишние пробелы по краям строки
+                if (processed) {
+                    previousATMW = processed.atmw || previousATMW; // Обновляем значение ATMW
+                    if (processed.dataType !== 'WORD') {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = processed.csvContent;
+                        outputList.appendChild(listItem);
+                    }
                 }
             });
         }
 
-        function parseLine(line) {
-            // Попробуем сначала выделить имя переменной и тип данных после ":" без использования регулярного выражения
+        function parseLine(line, previousATMW) {
             const colonIndex = line.indexOf(':');
             if (colonIndex !== -1) {
-                // Удаление подстрок вида {AT %MW(число)}
                 const variableName = line.substring(0, colonIndex).replace(/\{[^}]*\}/g, '').trim();
                 let dataTypeString = line.substring(colonIndex + 1).trim();
 
                 let dataType = 'Bit'; // По умолчанию тип данных Bit
                 let subDataType = 'M';
-                let Perem = 'True'; // По умолчанию True, исправлено значение 
+                let Perem = 'True'; // По умолчанию True
+                let atmw = previousATMW; // Используем предыдущее значение ATMW
+
+                // Извлечение значения ATMW
+                const atmwMatch = line.match(/\{AT %MW(\d+)\}/);
+                if (atmwMatch) {
+                    atmw = atmwMatch[1];
+                }
 
                 if (dataTypeString.includes('BOOL')) {
                     dataType = 'Word';
                     subDataType = 'MW';
-                    Perem = 'True'; // Исправлено значение
+                    Perem = 'True';
                 } else if (dataTypeString.includes('UINT') || dataTypeString.includes('REAL') || dataTypeString.includes('TIME')) {
                     dataType = 'Bit';
                     subDataType = 'M';
-                    Perem = 'False'; // Исправлено значение
+                    Perem = 'False';
                 } else {
                     return null; // Возвращаем null, если тип данных не определен
                 }
 
-                // Формирование CSV строки без чисел subAddress и address
+                // Формирование CSV строки
                 if (dataType !== 'WORD') {
                     const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
                         const r = Math.random() * 16 | 0;
@@ -98,8 +107,9 @@
                         return v.toString(16);
                     });
 
-                    const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},255,False,0,0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
-                    return { csvContent, dataType };
+                    // Здесь исправляем строку csvContent, чтобы включить адрес
+                    const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},${atmw},False,${atmw},0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
+                    return { csvContent, dataType, atmw };
                 }
             }
 
@@ -114,7 +124,6 @@
                 setTimeout(() => {
                     document.getElementById('message').style.display = 'none';
                 }, 3000);
-
             }, function (err) {
                 alert('Не удалось скопировать: ' + err);
             });
