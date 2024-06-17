@@ -10,7 +10,8 @@
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
 
-        #message {
+        #message1,
+        #message2 {
             display: none;
             color: green;
             font-weight: bold;
@@ -22,38 +23,63 @@
             background-color: black;
             color: #fff;
         }
+
         ul {
             padding: 20px;
         }
+
         li {
             list-style: auto;
             padding-top: 15px;
             border-bottom: 3px solid black;
             margin-bottom: 10px;
+            word-break: break-all;
+        }
+        .wrapper{
+            display: flex;
+            justify-content: space-between;
+        }
+        .wrapper > div {
+            width: 50%;
         }
     </style>
 </head>
 
 <body>
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
         <h1>Генератор CSV</h1>
         <textarea id="fileContent" rows="10" style="width: 100%;" placeholder="Вставьте содержимое файла здесь"></textarea>
         <button onclick="processFile()">Сгенерировать CSV</button>
         <hr>
-        <h2>Сгенерированный CSV:</h2>
-        <button onclick="copyToClipboard()">Копировать всё</button>
-        <h3 id="message">Успешно скопировано в буфер обмена!</h3>
-        <ul id="outputList"></ul>
+        <div class="wrapper">
+            <div class="left">
+                <h2>CSV (Bool / DO DI):</h2>
+                <button onclick="copyToClipboard('outputList1', 'message1')">Копировать всё (часть 1)</button>
+                <h3 id="message1">Успешно скопировано в буфер обмена!</h3>
+                <ul id="outputList1"></ul>
+            </div>
+            <div class="right">
+                <h2>CSV (Uint Real Time / AO AI):</h2>
+                <button onclick="copyToClipboard('outputList2', 'message2')">Копировать всё (часть 2)</button>
+                <h3 id="message2">Успешно скопировано в буфер обмена!</h3>
+                <ul id="outputList2"></ul>
+            </div>
+        </div>
+        
+        <hr>
+        
     </div>
 
     <script>
         function processFile() {
             const fileContent = document.getElementById('fileContent').value;
             const lines = fileContent.split('\n');
-            const outputList = document.getElementById('outputList');
+            const outputList1 = document.getElementById('outputList1');
+            const outputList2 = document.getElementById('outputList2');
 
             // Очистка списка перед добавлением новых элементов
-            outputList.innerHTML = '';
+            outputList1.innerHTML = '';
+            outputList2.innerHTML = '';
 
             let previousATMW = null;
 
@@ -61,10 +87,14 @@
                 const processed = parseLine(line.trim(), previousATMW); // Убираем лишние пробелы по краям строки
                 if (processed) {
                     previousATMW = processed.atmw || previousATMW; // Обновляем значение ATMW
-                    if (processed.dataType !== 'WORD') {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = processed.csvContent;
-                        outputList.appendChild(listItem);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = processed.csvContent;
+
+                    // Разделение на две части по типу данных
+                    if (processed.dataTypeString.includes('BOOL')) {
+                        outputList1.appendChild(listItem);
+                    } else if (processed.dataTypeString.includes('UINT') || processed.dataTypeString.includes('REAL') || processed.dataTypeString.includes('TIME')) {
+                        outputList2.appendChild(listItem);
                     }
                 }
             });
@@ -109,20 +139,20 @@
 
                     // Здесь исправляем строку csvContent, чтобы включить адрес
                     const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},${atmw},False,${atmw},0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
-                    return { csvContent, dataType, atmw };
+                    return { csvContent, dataTypeString, atmw };
                 }
             }
 
             return null;
         }
 
-        function copyToClipboard() {
-            const listItems = document.querySelectorAll('#outputList li');
+        function copyToClipboard(listId, messageId) {
+            const listItems = document.querySelectorAll(`#${listId} li`);
             const allText = Array.from(listItems).map(item => item.textContent).join('\n');
             navigator.clipboard.writeText(allText).then(function () {
-                document.getElementById('message').style.display = 'block';
+                document.getElementById(messageId).style.display = 'block';
                 setTimeout(() => {
-                    document.getElementById('message').style.display = 'none';
+                    document.getElementById(messageId).style.display = 'none';
                 }, 3000);
             }, function (err) {
                 alert('Не удалось скопировать: ' + err);
