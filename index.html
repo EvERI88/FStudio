@@ -34,6 +34,7 @@
             border-bottom: 3px solid black;
             margin-bottom: 10px;
             word-break: break-all;
+<<<<<<< HEAD
             position: relative;
             /* For tooltip positioning */
         }
@@ -85,6 +86,15 @@
             z-index: 100;
             max-width: 300px;
             word-break: break-word;
+=======
+        }
+        .wrapper{
+            display: flex;
+            justify-content: space-between;
+        }
+        .wrapper > div {
+            width: 50%;
+>>>>>>> 45a08c1e2032753acba689b2ba7f2246c8a4eb57
         }
     </style>
 </head>
@@ -110,6 +120,7 @@
                 <ul id="outputList2"></ul>
             </div>
         </div>
+<<<<<<< HEAD
 
         <hr>
 
@@ -127,6 +138,11 @@
 
         </br>
         </p>
+=======
+        
+        <hr>
+        
+>>>>>>> 45a08c1e2032753acba689b2ba7f2246c8a4eb57
     </div>
 
     <script>
@@ -150,6 +166,7 @@
             lines.forEach((line) => {
                 const processed = parseLine(line.trim(), previousATMW); // Убираем лишние пробелы по краям строки
                 if (processed) {
+<<<<<<< HEAD
                     previousATMW = processed.atmw || '0'; // Обновляем значение ATMW, заменяем null на 0
                     const listItem = document.createElement('li');
                     listItem.textContent = processed.csvContent;
@@ -162,6 +179,12 @@
 
                    
                     
+=======
+                    previousATMW = processed.atmw || previousATMW; // Обновляем значение ATMW
+                    const listItem = document.createElement('li');
+                    listItem.textContent = processed.csvContent;
+
+>>>>>>> 45a08c1e2032753acba689b2ba7f2246c8a4eb57
                     // Разделение на две части по типу данных
                     if (processed.dataTypeString.includes('BOOL')) {
                         outputList1.appendChild(listItem);
@@ -210,7 +233,11 @@
                     });
 
                     // Здесь исправляем строку csvContent, чтобы включить адрес
+<<<<<<< HEAD
                     const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},${atmw || '0'},False,${atmw || '0'},0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
+=======
+                    const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},${atmw},False,${atmw},0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
+>>>>>>> 45a08c1e2032753acba689b2ba7f2246c8a4eb57
                     return { csvContent, dataTypeString, atmw };
                 }
             }
