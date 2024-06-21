@@ -196,7 +196,7 @@
                 });
 
                 // Формирование CSV строки
-                const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},1,False,${atmw},0,0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
+                const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},1,False,${atmw},0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
                 return { csvContent, dataTypeString, atmw };
             }
 
