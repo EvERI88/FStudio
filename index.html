@@ -35,7 +35,6 @@
             margin-bottom: 10px;
             word-break: break-all;
             position: relative;
-            /* For tooltip positioning */
         }
 
         .wrapper {
@@ -64,7 +63,6 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            /* padding: 10px; */
             background-color: black;
             color: white;
             border: none;
@@ -110,23 +108,19 @@
                 <ul id="outputList2"></ul>
             </div>
         </div>
-        <div ></div>
-
+        <div></div>
         <hr>
-
     </div>
 
     <button class="info-button" onclick="toggleInfoTooltip()">?</button>
     <div class="info-tooltip" id="infoTooltip">
-        <p style="    text-align: justify;">Чтобы использовать генератор CSV, вставьте содержимое вашего файла в текстовое поле и нажмите "Сгенерировать
+        <p style="text-align: justify;">Чтобы использовать генератор CSV, вставьте содержимое вашего файла в текстовое
+            поле и нажмите "Сгенерировать
             CSV". Вы можете копировать результат, используя соответствующие кнопки "Копировать всё".
             <br>
-            <b style="color: red; ">
+            <b style="color: red;">
                 Если в вашей переменной будут названия как типы переменных, тогда генератор отработает некорректно!!!
-
             </b>
-
-        </br>
         </p>
     </div>
 
@@ -155,14 +149,7 @@
                     const listItem = document.createElement('li');
                     listItem.textContent = processed.csvContent;
 
-                    // Создание и добавление tooltip
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'tooltip';
-                    tooltip.textContent = processed.csvContent;
-                    listItem.appendChild(tooltip);
 
-                   
-                    
                     // Разделение на две части по типу данных
                     if (processed.dataTypeString.includes('BOOL')) {
                         outputList1.appendChild(listItem);
@@ -202,18 +189,15 @@
                     return null; // Возвращаем null, если тип данных не определен
                 }
 
-                // Формирование CSV строки
-                if (dataType !== 'WORD') {
-                    const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-                        const r = Math.random() * 16 | 0;
-                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                        return v.toString(16);
-                    });
+                const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
 
-                    // Здесь исправляем строку csvContent, чтобы включить адрес
-                    const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},${atmw || '0'},False,${atmw || '0'},0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
-                    return { csvContent, dataTypeString, atmw };
-                }
+                // Формирование CSV строки
+                const csvContent = `${uuid()},${variableName},HMI N+1:[Ethernet ПЛК:Schneider MODBUS_TCP],%${subDataType},${dataType},1,False,${atmw},0,0,0,False,${Perem},,,,,,,,,,,,,334,,,1`;
+                return { csvContent, dataTypeString, atmw };
             }
 
             return null;
@@ -221,7 +205,7 @@
 
         function copyToClipboard(listId, messageId) {
             const listItems = document.querySelectorAll(`#${listId} li`);
-            const allText = Array.from(listItems).map(item => item.textContent).join('\n');
+            const allText = Array.from(listItems).map(item => item.textContent.split('\n')[0]).join('\n');
             navigator.clipboard.writeText(allText).then(function () {
                 document.getElementById(messageId).style.display = 'block';
                 setTimeout(() => {
@@ -231,6 +215,7 @@
                 alert('Не удалось скопировать: ' + err);
             });
         }
+
     </script>
 </body>
 
